@@ -6,6 +6,14 @@ import numpy as np
 from scipy.optimize import curve_fit
 from tkinter import scrolledtext
 
+def copy_text(event):
+    if event.state == 4:  # Проверяем состояние клавиши Ctrl
+        widget = event.widget
+        selected_text = widget.get("sel.first", "sel.last")
+        widget.clipboard_clear()
+        widget.clipboard_append(selected_text)
+
+
 def exponential_power_func(x, B0, B1, B2):
     return B0 * np.exp(B1 * x) * x**B2
 
@@ -61,11 +69,17 @@ def calculate_and_plot():
         result_text += f"Экспоненциально-степенная регрессия Y=B0*Exp(x*B1)*X^B2:\nB0:\t{exponential_power_coefficients[0]:.10f} \nB1:\t{exponential_power_coefficients[1]:.10f} \nB2:\t{exponential_power_coefficients[2]:.10f}"
         polynomial_str = " + ".join([f"{coeff:.5f} * x^{i}" for i, coeff in enumerate(polynomial_coefficients[::-1])])
         result_text += f"\n\nПолином {polynomial_degree} степени:\n{polynomial_str}\n\n"
+        result_text += f"\nОсмос\t{float(ECOsmosEntry.get())}\n"
+        for n in data:
+            result_text += f"{n[0]}\t{n[1]+float(ECOsmosEntry.get())}\n"
         result_window = tk.Toplevel(app)
         result_window.title("Результаты")
         result_window.geometry("600x300")
 
+
         result_textbox = scrolledtext.ScrolledText(result_window, wrap=tk.WORD, width=150, height=20)
+
+
         result_textbox.pack(padx=10, pady=10)
         result_textbox.insert(tk.END, result_text)
         #x_fit = np.linspace(0.1, max(data, key=lambda x: x[0])[0], 100)
@@ -85,8 +99,8 @@ def calculate_and_plot():
         y_values = [point[1] for point in data]
         plt.scatter(x_values, y_values, label="Исходные данные")
 
-        plt.xlabel('x')
-        plt.ylabel('y')
+        plt.xlabel('ml/l')
+        plt.ylabel('EC')
         plt.legend()
         plt.grid(True)
         plt.show()
@@ -94,6 +108,10 @@ def calculate_and_plot():
 # Создание интерфейса
 app = tk.Tk()
 app.title("Регрессия")
+app.bind('<Control-c>', copy_text(app))
+
+
+# Привязка показа контекстного меню к событию щелчка правой кнопкой мыши
 
 data_entries = []
 default_data = [

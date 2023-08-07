@@ -1,0 +1,2 @@
+Программка строит график по экспериментальным данным и вычилсяет закономерности для 
+x_fit = np.linspace(0.1, max(data, key=lambda x: x[0])[0], 100)x_fit = np.linspace(0.1, max(data, key=lambda x: x[0])[0], 100)
