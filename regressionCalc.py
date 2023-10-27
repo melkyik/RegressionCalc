@@ -13,6 +13,20 @@ def copy_text(event):
         widget.clipboard_clear()
         widget.clipboard_append(selected_text)
 
+def move_to_next_entry(event):
+    # Получение текущего виджета, на котором было событие
+    current_widget = app.focus_get()
+
+    # Переключение фокуса на следующий элемент y_entry
+    for x_entry, y_entry in data_entries:
+        if current_widget == y_entry:
+            index = data_entries.index((x_entry, y_entry))
+            if index + 1 < len(data_entries):
+                next_y_entry = data_entries[index + 1][1]
+                next_y_entry.focus()
+                next_y_entry.select_range(0, tk.END)
+            break
+
 
 def exponential_power_func(x, B0, B1, B2):
     return B0 * np.exp(B1 * x) * x**B2
@@ -69,9 +83,11 @@ def calculate_and_plot():
         result_text += f"Экспоненциально-степенная регрессия Y=B0*Exp(x*B1)*X^B2:\nB0:\t{exponential_power_coefficients[0]:.10f} \nB1:\t{exponential_power_coefficients[1]:.10f} \nB2:\t{exponential_power_coefficients[2]:.10f}"
         polynomial_str = " + ".join([f"{coeff:.5f} * x^{i}" for i, coeff in enumerate(polynomial_coefficients[::-1])])
         result_text += f"\n\nПолином {polynomial_degree} степени:\n{polynomial_str}\n\n"
-        result_text += f"\nОсмос\t{float(ECOsmosEntry.get())}\n"
+        result_text += f"<Исходные данные>\nОсмос\t{float(ECOsmosEntry.get())}\n"
         for n in data:
             result_text += f"{n[0]}\t{n[1]+float(ECOsmosEntry.get())}\n"
+        
+        result_text += f"B0\tB1\tB2\n{exponential_power_coefficients[0]:.10f}\t{exponential_power_coefficients[1]:.10f}\t{exponential_power_coefficients[2]:.10f}\n"
         result_window = tk.Toplevel(app)
         result_window.title("Результаты")
         result_window.geometry("600x300")
@@ -109,7 +125,7 @@ def calculate_and_plot():
 app = tk.Tk()
 app.title("Регрессия")
 app.bind('<Control-c>', copy_text(app))
-
+app.bind('<Control-с>', copy_text(app))
 
 # Привязка показа контекстного меню к событию щелчка правой кнопкой мыши
 
@@ -131,7 +147,10 @@ default_data = [
     (5, 1203),
     (6, 1442),
      (7, 1676),
-     (8, 1913)
+     (8, 1913),
+     (9,2151),
+     (10,2395)
+
 ]
 row_num = 0
 ECOsmosLabel = ttk.Label(app, text="Значение EC осмоса :")
@@ -152,6 +171,7 @@ for i in range(20):
         y_entry.insert(0, str(default_data[i][1]))
 
     data_entries.append((x_entry, y_entry))
+    y_entry.bind('<Return>', move_to_next_entry)
     row_num += 1
 
 degree_label = ttk.Label(app, text="Степень полинома:")
@@ -181,6 +201,5 @@ xmaxEntry.insert(0, str(max(default_data, key=lambda x: x[0])[0],))
 
 calculate_button = ttk.Button(app, text="Рассчитать и построить график", command=calculate_and_plot)
 calculate_button.grid(row=row_num+2, column=0, columnspan=2, padx=5, pady=10)
-
 
 app.mainloop()

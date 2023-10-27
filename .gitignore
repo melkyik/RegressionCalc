@@ -3,3 +3,5 @@
 /interface.spec
 /newfunc.spec
 /onefunc.spec
+/.venv
+/*.spec
